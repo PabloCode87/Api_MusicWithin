@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ejemplos.modelo.Usuario;
+import com.ejemplos.repository.EventoRepositorio;
 import com.ejemplos.repository.UsuarioRepositorio;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -17,6 +19,9 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
+    
+    @Autowired
+    private EventoRepositorio eventoRepositorio;
 
     public List<Usuario> obtenerTodos() {
         return this.usuarioRepositorio.findAll();
@@ -64,6 +69,15 @@ public class UsuarioService {
     
     public List<Usuario> buscarUsuarios(String keyword) {
         return this.usuarioRepositorio.findByUsernameOrNombreOrApellidos(keyword);
+    }
+    
+    public List<Usuario> obtenerUsuariosPorIDs(List<Long> usuariosIDs) {
+        return usuarioRepositorio.findAllByUserIDIn(usuariosIDs);
+    }
+    
+    @Transactional
+    public void eliminarAsistenciaAEvento(Long eventoID, Long userID) {
+        eventoRepositorio.deleteAttendanceRecord(eventoID, userID);
     }
 
 }
