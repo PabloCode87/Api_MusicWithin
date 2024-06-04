@@ -2,6 +2,7 @@ package com.ejemplos.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ejemplos.modelo.Album;
+import com.ejemplos.modelo.Cancion;
 import com.ejemplos.services.AlbumService;
 
 import lombok.RequiredArgsConstructor;
@@ -53,4 +55,22 @@ public class AlbumController {
 		this.albumService.eliminarAlbum(albumID);
 		return ResponseEntity.ok().build();
 	}
+	
+	@PostMapping("/album/{albumOrigenID}/mover-cancion/{cancionID}/{albumDestinoID}")
+    public ResponseEntity<?> moverCancionDeAlbum(@PathVariable Long cancionID, 
+                                                 @PathVariable Long albumOrigenID, 
+                                                 @PathVariable Long albumDestinoID) {
+        Album albumDestino = albumService.moverCancionDeAlbum(cancionID, albumOrigenID, albumDestinoID);
+        if (albumDestino != null) {
+            return ResponseEntity.ok().body(albumDestino);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se pudo mover la canción al álbum de destino.");
+        }
+    }
+	
+	@GetMapping("/album/{albumId}/canciones")
+    public ResponseEntity<List<Cancion>> obtenerCancionesPorAlbumId(@PathVariable Long albumId) {
+        List<Cancion> canciones = albumService.findAllSongsByAlbumId(albumId);
+        return ResponseEntity.ok().body(canciones);
+    }
 }
