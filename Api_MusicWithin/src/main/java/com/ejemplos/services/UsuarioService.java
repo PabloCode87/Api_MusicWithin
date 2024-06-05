@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.ejemplos.modelo.Roles;
@@ -23,6 +24,9 @@ public class UsuarioService {
     
     @Autowired
     private EventoRepositorio eventoRepositorio;
+    
+    @Autowired
+	private PasswordEncoder passwordEncoder;
 
     public List<Usuario> obtenerTodos() {
         return this.usuarioRepositorio.findAll();
@@ -59,6 +63,12 @@ public class UsuarioService {
         if (usuarioExistente != null) {
             usuario.setUserID(id);
             usuario.setRole(usuarioExistente.getRole());
+
+            if (!usuarioExistente.getPassword_hash().equals(usuario.getPassword_hash())) {
+                String encryptedPassword = passwordEncoder.encode(usuario.getPassword_hash());
+                usuario.setPassword_hash(encryptedPassword);
+            }
+            
             return this.usuarioRepositorio.save(usuario);
         }
         return null;

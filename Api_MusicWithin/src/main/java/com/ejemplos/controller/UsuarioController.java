@@ -10,6 +10,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +45,9 @@ public class UsuarioController {
 	@Autowired
 	private JwtUtil jwtUtil;
 	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
 	@PostMapping("/generarToken")
 	public ResponseEntity<?> generateToken() {
 	    String token = jwtUtil.generateToken();
@@ -59,7 +63,7 @@ public class UsuarioController {
 
 	    Usuario usuario = usuarioService.findByUsername(username);
 
-	    if (usuario != null && usuario.getPassword_hash().equals(password)) {
+	    if (usuario != null && passwordEncoder.matches(password, usuario.getPassword_hash())) {
 	        String token = jwtUtil.generateToken(username);
 	        Map<String, String> response = new HashMap<>();
 	        response.put("token", token);
@@ -102,25 +106,30 @@ public class UsuarioController {
 	}
 	
 	@PostMapping("/usuario")
-    public ResponseEntity<?> insertarUsuario(@RequestBody Map<String, Object> payload){
-        Usuario usuario = new Usuario();
-        usuario.setUsername((String) payload.get("username"));
-        usuario.setNombre((String) payload.get("nombre"));
-        usuario.setApellidos((String) payload.get("apellidos"));
-        usuario.setFecha_creacion(LocalDateTime.parse((String) payload.get("fecha_creacion")));
-        usuario.setEmail((String) payload.get("email"));
-        usuario.setPassword_hash((String) payload.get("password_hash"));
-        usuario.setFoto(payload.get("foto") != null ? Base64.getDecoder().decode((String) payload.get("foto")) : null);
+	public ResponseEntity<?> insertarUsuario(@RequestBody Map<String, Object> payload){
+	    Usuario usuario = new Usuario();
+	    usuario.setUsername((String) payload.get("username"));
+	    usuario.setNombre((String) payload.get("nombre"));
+	    usuario.setApellidos((String) payload.get("apellidos"));
+	    usuario.setFecha_creacion(LocalDateTime.parse((String) payload.get("fecha_creacion")));
+	    usuario.setEmail((String) payload.get("email"));
+	    
+	    String password = (String) payload.get("password_hash");
 
-        Long roleID = ((Number) payload.get("roleID")).longValue();
-        Roles role = rolesRepository.findById(roleID)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+	    String passwordCifrada = passwordEncoder.encode(password);
+	    usuario.setPassword_hash(passwordCifrada);
+	    
+	    usuario.setFoto(payload.get("foto") != null ? Base64.getDecoder().decode((String) payload.get("foto")) : null);
 
-        usuario.setRole(role);
+	    Long roleID = ((Number) payload.get("roleID")).longValue();
+	    Roles role = rolesRepository.findById(roleID)
+	            .orElseThrow(() -> new RuntimeException("Role not found"));
 
-        Usuario usuarioNuevo = this.usuarioService.insertarUsuario(usuario);
-        return ResponseEntity.ok().body(usuarioNuevo);
-    }
+	    usuario.setRole(role);
+
+	    Usuario usuarioNuevo = this.usuarioService.insertarUsuario(usuario);
+	    return ResponseEntity.ok().body(usuarioNuevo);
+	}
 	
 	@PutMapping("usuario/{usuarioID}")
 	public ResponseEntity<?>actualizarUsuario(@PathVariable Long usuarioID, @RequestBody Usuario Usuario){
