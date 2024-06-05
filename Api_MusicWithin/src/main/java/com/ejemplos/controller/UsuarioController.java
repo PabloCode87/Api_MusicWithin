@@ -181,5 +181,15 @@ public class UsuarioController {
 	        return ResponseEntity.ok().body(usuarios);
 	    }
 	}
+	
+	@GetMapping("/usuario/{username}/tipo")
+    public ResponseEntity<?> obtenerTipoUsuario(@PathVariable String username) {
+        String tipoUsuario = usuarioService.determinarTipoUsuario(username);
+        if (!tipoUsuario.equals("UNKNOWN")) {
+            return ResponseEntity.ok().body(Map.of("tipoUsuario", tipoUsuario));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Tipo de usuario no encontrado"));
+        }
+    }
 
 }

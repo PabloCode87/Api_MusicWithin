@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ejemplos.modelo.Roles;
 import com.ejemplos.modelo.Usuario;
 import com.ejemplos.repository.EventoRepositorio;
 import com.ejemplos.repository.UsuarioRepositorio;
@@ -78,6 +79,26 @@ public class UsuarioService {
     @Transactional
     public void eliminarAsistenciaAEvento(Long eventoID, Long userID) {
         eventoRepositorio.deleteAttendanceRecord(eventoID, userID);
+    }
+    
+    public String determinarTipoUsuario(String username) {
+        Usuario usuario = usuarioRepositorio.findByUsername(username);
+        if (usuario != null) {
+            Roles role = usuario.getRole();
+            if (role != null) {
+                String roleName = role.getRole_name();
+                if (roleName.equals("ADMIN")) {
+                    return "ADMIN";
+                } else if (roleName.equals("USER")) {
+                    return "USER";
+                } else if (roleName.equals("SUPERVISOR")) {
+                    return "SUPERVISOR";
+                } else {
+                    return "UNKNOWN";
+                }
+            }
+        }
+        return "UNKNOWN";
     }
 
 }
