@@ -18,4 +18,7 @@ public interface UsuarioRepositorio extends JpaRepository<Usuario, Long> {
     List<Usuario> findByUsernameOrNombreOrApellidos(@Param("keyword") String keyword);
     
     List<Usuario> findAllByUserIDIn(List<Long> usuariosIDs);
+    
+    @Query("SELECT u.role.roleID from Usuario u WHERE u.userID = :userID")
+    Long encontrarRoleUsuario(Long userID);
 }

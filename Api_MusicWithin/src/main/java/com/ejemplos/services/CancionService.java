@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.ejemplos.modelo.Cancion;
 import com.ejemplos.modelo.Usuario;
 import com.ejemplos.repository.CancionRepositorio;
+import com.ejemplos.repository.ComentarioRepositorio;
 import com.ejemplos.repository.PlaylistSongRepositorio;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,9 @@ public class CancionService {
 	
 	@Autowired
     private PlaylistSongRepositorio playlistSongRepository;
+	
+	@Autowired
+	private ComentarioRepositorio comentarioRepositorio;
 	
 	public List<Cancion> obtenerTodos(){
 		return this.cancionRepositorio.findAll();
@@ -51,6 +55,10 @@ public class CancionService {
 	
 	public void eliminarReferenciasEnPlaylists(Long cancionID) {
         this.playlistSongRepository.deleteBySongID(cancionID);
+    }
+	
+	public void eliminarReferenciasEnComentarios(Long cancionID) {
+        this.comentarioRepositorio.deleteBySongSongID(cancionID);
     }
 	
     public String encodeAudioFile(byte[] audioFile) {

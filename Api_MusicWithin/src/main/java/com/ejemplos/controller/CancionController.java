@@ -86,20 +86,15 @@ public class CancionController {
 	@PutMapping("/cancion/{cancionID}")
 	public ResponseEntity<?> actualizarCancion(@PathVariable Long cancionID,
 	                                           @RequestBody Cancion cancion) throws IOException {
-	    // Obtener la canción existente
 	    Cancion cancionExistente = cancionService.obtenerPorId(cancionID);
 	    if (cancionExistente == null) {
 	        return ResponseEntity.badRequest().body("Canción no encontrada");
 	    }
-	    
-	    // Actualizar los campos necesarios
+
 	    cancionExistente.setSong_name(cancion.getSong_name());
 	    cancionExistente.setArtist(cancion.getArtist());
 	    cancionExistente.setGenre(cancion.getGenre());
 	    cancionExistente.setDuration(cancion.getDuration());
-	    // Actualizar otros campos según sea necesario
-	    
-	    // Guardar la canción actualizada
 	    Cancion cancionActualizada = cancionService.actualizarCancion(cancionID, cancionExistente);
 	    
 	    return ResponseEntity.ok().body(cancionActualizada);
@@ -113,6 +108,7 @@ public class CancionController {
 	
 	@DeleteMapping("/cancionPlaylist/{cancionID}")
 	public ResponseEntity<?> eliminarCancionDePlaylist(@PathVariable Long cancionID) {
+		cancionService.eliminarReferenciasEnComentarios(cancionID);
 	    cancionService.eliminarReferenciasEnPlaylists(cancionID);
 	    cancionService.eliminarCancion(cancionID);
 	    return ResponseEntity.ok().build();

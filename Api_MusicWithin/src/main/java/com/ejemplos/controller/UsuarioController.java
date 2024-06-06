@@ -211,5 +211,11 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Tipo de usuario no encontrado"));
         }
     }
+	
+	@GetMapping("usuario/rol/{userID}")
+	public ResponseEntity<?> obtenerRoleID(@PathVariable Long userID){
+		Long roleID=this.usuarioService.encontrarRoleUsuario(userID);
+		return ResponseEntity.ok().body(roleID);
+	}
 
 }

@@ -110,5 +110,9 @@ public class UsuarioService {
         }
         return "UNKNOWN";
     }
+    
+    public Long encontrarRoleUsuario(Long userID) {
+    	return this.usuarioRepositorio.encontrarRoleUsuario(userID);
+    }
 
 }
