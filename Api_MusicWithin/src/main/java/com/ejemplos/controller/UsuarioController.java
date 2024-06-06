@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ import com.ejemplos.modelo.Roles;
 import com.ejemplos.modelo.Usuario;
 import com.ejemplos.repository.JwtUtil;
 import com.ejemplos.repository.RolesRepositorio;
+import com.ejemplos.services.EmailService;
 import com.ejemplos.services.RolesService;
 import com.ejemplos.services.UsuarioService;
 
@@ -47,6 +49,9 @@ public class UsuarioController {
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+    private EmailService emailService;
 	
 	@PostMapping("/generarToken")
 	public ResponseEntity<?> generateToken() {
@@ -172,12 +177,18 @@ public class UsuarioController {
 	    String email = request.get("email");
 	    Usuario usuario = usuarioService.findByUsernameAndEmail(username, email);
 	    if (usuario != null) {
-	        String password = usuario.getPassword_hash();
-	        Map<String, String> response = new HashMap<>();
-	        response.put("password", password);
-	        return ResponseEntity.ok(response);
+	        String nuevaPassword = UUID.randomUUID().toString().substring(0, 8);
+	        String encryptedPassword = passwordEncoder.encode(nuevaPassword);
+	        usuario.setPassword_hash(encryptedPassword);
+	        usuarioService.actualizarUsuario(usuario.getUserID(), usuario);
+	        emailService.sendEmail(
+	                email,
+	                "Recuperación de Contraseña",
+	                "Tu nueva contraseña es: " + nuevaPassword
+	        );
+	        return ResponseEntity.ok(Map.of("message", "Nueva contraseña enviada a tu correo electrónico"));
 	    } else {
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado o correo electrónico incorrecto");
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Usuario no encontrado o correo electrónico incorrecto"));
 	    }
 	}
 	
