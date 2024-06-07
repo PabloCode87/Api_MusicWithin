@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.ejemplos.modelo.Roles;
 import com.ejemplos.modelo.Usuario;
 import com.ejemplos.repository.EventoRepositorio;
+import com.ejemplos.repository.UserFollowsUserRepositorio;
 import com.ejemplos.repository.UsuarioRepositorio;
 
 import jakarta.transaction.Transactional;
@@ -24,6 +25,9 @@ public class UsuarioService {
     
     @Autowired
     private EventoRepositorio eventoRepositorio;
+    
+    @Autowired
+    private UserFollowsUserRepositorio userFollowsUserRepositorio;
     
     @Autowired
 	private PasswordEncoder passwordEncoder;
@@ -113,6 +117,11 @@ public class UsuarioService {
     
     public Long encontrarRoleUsuario(Long userID) {
     	return this.usuarioRepositorio.encontrarRoleUsuario(userID);
+    }
+    
+    public List<Usuario> obtenerUsuariosSeguidosPorUsuario(Long followerID) {
+        List<Long> followedUserIDs = userFollowsUserRepositorio.findFollowedUsersByFollowerID(followerID);
+        return usuarioRepositorio.findAllById(followedUserIDs);
     }
 
 }

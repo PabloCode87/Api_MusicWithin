@@ -217,5 +217,11 @@ public class UsuarioController {
 		Long roleID=this.usuarioService.encontrarRoleUsuario(userID);
 		return ResponseEntity.ok().body(roleID);
 	}
+	
+	@GetMapping("/usuario/seguidos/{followerID}")
+    public ResponseEntity<?> obtenerUsuariosSeguidosPorUsuario(@PathVariable Long followerID) {
+        List<Usuario> usuariosSeguidos = usuarioService.obtenerUsuariosSeguidosPorUsuario(followerID);
+        return ResponseEntity.ok().body(usuariosSeguidos);
+    }
 
 }
