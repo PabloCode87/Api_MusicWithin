@@ -112,28 +112,33 @@ public class UsuarioController {
 	
 	@PostMapping("/usuario")
 	public ResponseEntity<?> insertarUsuario(@RequestBody Map<String, Object> payload){
-	    Usuario usuario = new Usuario();
-	    usuario.setUsername((String) payload.get("username"));
-	    usuario.setNombre((String) payload.get("nombre"));
-	    usuario.setApellidos((String) payload.get("apellidos"));
-	    usuario.setFecha_creacion(LocalDateTime.parse((String) payload.get("fecha_creacion")));
-	    usuario.setEmail((String) payload.get("email"));
-	    
-	    String password = (String) payload.get("password_hash");
+	    try {
+	        Usuario usuario = new Usuario();
+	        usuario.setUsername((String) payload.get("username"));
+	        usuario.setNombre((String) payload.get("nombre"));
+	        usuario.setApellidos((String) payload.get("apellidos"));
+	        usuario.setFecha_creacion(LocalDateTime.parse((String) payload.get("fecha_creacion")));
+	        usuario.setEmail((String) payload.get("email"));
+	        
+	        String password = (String) payload.get("password_hash");
 
-	    String passwordCifrada = passwordEncoder.encode(password);
-	    usuario.setPassword_hash(passwordCifrada);
-	    
-	    usuario.setFoto(payload.get("foto") != null ? Base64.getDecoder().decode((String) payload.get("foto")) : null);
+	        String passwordCifrada = passwordEncoder.encode(password);
+	        usuario.setPassword_hash(passwordCifrada);
+	        
+	        usuario.setFoto(payload.get("foto") != null ? Base64.getDecoder().decode((String) payload.get("foto")) : null);
 
-	    Long roleID = ((Number) payload.get("roleID")).longValue();
-	    Roles role = rolesRepository.findById(roleID)
-	            .orElseThrow(() -> new RuntimeException("Role not found"));
+	        Long roleID = ((Number) payload.get("roleID")).longValue();
+	        Roles role = rolesRepository.findById(roleID)
+	                .orElseThrow(() -> new RuntimeException("Role not found"));
 
-	    usuario.setRole(role);
+	        usuario.setRole(role);
 
-	    Usuario usuarioNuevo = this.usuarioService.insertarUsuario(usuario);
-	    return ResponseEntity.ok().body(usuarioNuevo);
+	        Usuario usuarioNuevo = this.usuarioService.insertarUsuario(usuario);
+	        return ResponseEntity.ok().body(usuarioNuevo);
+	    } catch (Exception e) {
+	        e.printStackTrace();  // Esto registrará el stack trace del error en la consola del servidor.
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear el usuario");
+	    }
 	}
 	
 	@PutMapping("usuario/{usuarioID}")
